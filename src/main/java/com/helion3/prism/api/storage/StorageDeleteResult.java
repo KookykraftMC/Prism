@@ -25,4 +25,31 @@ package com.helion3.prism.api.storage;
 
 public class StorageDeleteResult implements StorageResult {
 
+    @Override public int getDeletedCount() {
+        return 0;
+    }
+
+    @Override public boolean wasAcknowledged() {
+        return false;
+    }
+
+    @Override public int getInsertedCount() {
+        return 0;
+    }
+
+    @Override public int getMatchedCount() {
+        return 0;
+    }
+
+    @Override public boolean isModifiedCountAvailable() {
+        return false;
+    }
+
+    @Override public int getModifiedCount() {
+        return 0;
+    }
+
+    @Override public String getResultInfo() {
+        return null;
+    }
 }

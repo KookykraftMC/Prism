@@ -25,4 +25,17 @@ package com.helion3.prism.api.storage;
 
 public interface StorageResult {
 
+    int getDeletedCount();
+
+    boolean wasAcknowledged();
+
+    int getInsertedCount();
+
+    int getMatchedCount();
+
+    boolean isModifiedCountAvailable();
+
+    int getModifiedCount();
+
+    String getResultInfo();
 }

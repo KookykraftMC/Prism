@@ -35,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import com.helion3.prism.api.flags.Flag;
 import com.helion3.prism.api.query.*;
 import com.helion3.prism.api.records.Result;
+import com.mongodb.bulk.BulkWriteResult;
 import org.bson.Document;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
@@ -159,11 +160,9 @@ public class MongoRecords implements StorageAdapterRecords {
        }
 
        // Write
-       collection.bulkWrite(documents, bulkWriteOptions);
+       BulkWriteResult bwr = collection.bulkWrite(documents, bulkWriteOptions);
 
-       // @todo implement real results, BulkWriteResult
-
-       return new StorageWriteResult();
+       return new StorageWriteResult(bwr);
    }
 
    /**

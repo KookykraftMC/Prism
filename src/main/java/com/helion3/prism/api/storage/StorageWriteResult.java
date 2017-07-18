@@ -23,6 +23,74 @@
  */
 package com.helion3.prism.api.storage;
 
+import com.mongodb.bulk.BulkWriteResult;
+
 public class StorageWriteResult implements StorageResult {
 
+    private final int deletedCount;
+    private final int insertedCount;
+    private final int matchedCount;
+    private final int modifiedCount;
+    private final boolean isModifiedCountAvailable;
+    private final boolean wasAcknowledged;
+
+    public StorageWriteResult(int deletedCount, int insertedCount, int matchedCount, int modifiedCount, boolean isModifiedCountAvailable,
+            boolean wasAcknowledged) {
+        this.deletedCount = deletedCount;
+        this.insertedCount = insertedCount;
+        this.matchedCount = matchedCount;
+        this.modifiedCount = modifiedCount;
+        this.isModifiedCountAvailable = isModifiedCountAvailable;
+        this.wasAcknowledged = wasAcknowledged;
+    }
+
+    public StorageWriteResult(BulkWriteResult bwr) {
+        this.deletedCount = bwr.getDeletedCount();
+        this.insertedCount = bwr.getInsertedCount();
+        this.matchedCount = bwr.getMatchedCount();
+        this.modifiedCount = bwr.getModifiedCount();
+        this.isModifiedCountAvailable = bwr.isModifiedCountAvailable();
+        this.wasAcknowledged = bwr.wasAcknowledged();
+    }
+
+    @Override public int getDeletedCount() {
+        return deletedCount;
+    }
+
+    @Override public boolean wasAcknowledged() {
+        return wasAcknowledged;
+    }
+
+    @Override public int getInsertedCount() {
+        return insertedCount;
+    }
+
+    @Override public int getMatchedCount() {
+        return matchedCount;
+    }
+
+    @Override public boolean isModifiedCountAvailable() {
+        return isModifiedCountAvailable;
+    }
+
+    @Override public int getModifiedCount() {
+        return modifiedCount;
+    }
+
+    @Override public String getResultInfo() {
+        String s;
+        if (isModifiedCountAvailable) {
+            s = "Acknowledged: " + wasAcknowledged +
+                    ", Inserted: " + insertedCount +
+                    ", Deleted: " + deletedCount +
+                    ", Matched: " + matchedCount +
+                    ", Modified: " + modifiedCount;
+        } else {
+            s = "Acknowledged: " + wasAcknowledged +
+                    ", Inserted: " + insertedCount +
+                    ", Deleted: " + deletedCount +
+                    ", Matched: " + matchedCount;
+        }
+        return s;
+    }
 }

@@ -26,6 +26,7 @@ package com.helion3.prism.queues;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.helion3.prism.api.storage.StorageWriteResult;
 import org.spongepowered.api.data.DataContainer;
 
 import com.helion3.prism.Prism;
@@ -47,7 +48,8 @@ public class RecordingQueueManager implements Runnable {
 
         if (eventsSaveBatch.size() > 0) {
             try {
-                Prism.getStorageAdapter().records().write(eventsSaveBatch);
+                StorageWriteResult swr = Prism.getStorageAdapter().records().write(eventsSaveBatch);
+                Prism.getLogger().info(swr.getResultInfo());
             } catch (Exception e) {
                 // @todo handle failures
                 e.printStackTrace();

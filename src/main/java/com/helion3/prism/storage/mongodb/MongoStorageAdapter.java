@@ -151,6 +151,6 @@ public class MongoStorageAdapter implements StorageAdapter {
     // @todo implement
     @Override
     public boolean testConnection() throws Exception {
-        return false;
+        return true;
     }
 }
