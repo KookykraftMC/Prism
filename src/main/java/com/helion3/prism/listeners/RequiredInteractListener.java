@@ -23,16 +23,25 @@
  */
 package com.helion3.prism.listeners;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import com.helion3.prism.api.flags.Flag;
+import com.helion3.prism.api.query.Sort;
+import com.helion3.prism.api.records.Actionable;
+import com.helion3.prism.api.records.ActionableResult;
+import com.helion3.prism.api.records.Result;
+import com.helion3.prism.util.*;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.InteractEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent.Secondary;
+import org.spongepowered.api.event.entity.living.humanoid.HandInteractEvent;
 import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -40,8 +49,6 @@ import com.helion3.prism.Prism;
 import com.helion3.prism.api.query.ConditionGroup;
 import com.helion3.prism.api.query.Query;
 import com.helion3.prism.api.query.QuerySession;
-import com.helion3.prism.util.AsyncUtil;
-import com.helion3.prism.util.Format;
 
 public class RequiredInteractListener {
     /**
@@ -83,6 +90,88 @@ public class RequiredInteractListener {
             // Pass off to an async lookup helper
             try {
                 AsyncUtil.lookup(session);
+            } catch (Exception e) {
+                player.sendMessage(Format.error(e.getMessage()));
+                e.printStackTrace();
+            }
+
+            event.setCancelled(true);
+        } else if (Prism.getActiveRBWands().contains(player.getUniqueId())) {
+            QuerySession session = new QuerySession(player);
+            session.addFlag(Flag.EXTENDED);
+            session.addFlag(Flag.NO_GROUP);
+
+            Query query = session.newQuery();
+
+            if (event.getTargetBlock().equals(BlockSnapshot.NONE)) {
+                return;
+            }
+
+            // Location of block
+            Location<World> location = event.getTargetBlock().getLocation().get();
+
+            // Secondary click gets location relative to side clicked
+            if (event instanceof Secondary) {
+                if (((InteractBlockEvent.Secondary) event).getHandType().equals(HandTypes.MAIN_HAND)) {
+                    location = location.getRelative(event.getTargetSide());
+                }
+            }
+
+            query.addCondition(ConditionGroup.from(location));
+
+
+            // Pass off to an async lookup helper
+            try {
+                player.sendMessage(Format.heading("Querying records..."));
+
+                List<ActionableResult> actionResults = new ArrayList<>();
+                CompletableFuture<List<Result>> futureResults = Prism.getStorageAdapter().records().query(session, false);
+                futureResults.thenAccept(results -> {
+                    if (results.isEmpty()) {
+                        player.sendMessage(Format.error("No results."));
+                    } else {
+                        try {
+                            // Iterate record results
+                            for (Result result : results) {
+                                if (result instanceof Actionable) {
+                                    Actionable actionable = (Actionable) result;
+
+                                    actionResults.add(actionable.rollback());
+                                }
+                            }
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        int appliedCount = 0;
+                        int skippedCount = 0;
+                        for (ActionableResult result : actionResults) {
+                            if (result.applied()) {
+                                appliedCount++;
+                            } else {
+                                skippedCount++;
+                            }
+                        }
+
+                        Map<String, String> tokens = new HashMap<>();
+                        tokens.put("appliedCount", ""+appliedCount);
+                        tokens.put("skippedCount", ""+skippedCount);
+
+                        final String messageTemplate;
+                        if (skippedCount > 0) {
+                            messageTemplate = Translation.from("rollback.success.withskipped");
+                        } else {
+                            messageTemplate = Translation.from("rollback.success");
+                        }
+
+                        player.sendMessage(Format.heading(
+                                Text.of(Template.parseTemplate(messageTemplate, tokens)),
+                                " ", Format.bonus(Translation.from("rollback.success.bonus"))
+                        ));
+
+                        Prism.getLastActionResults().put(player.getUniqueId(), actionResults);
+                    }
+                });
             } catch (Exception e) {
                 player.sendMessage(Format.error(e.getMessage()));
                 e.printStackTrace();

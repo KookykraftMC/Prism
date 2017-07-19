@@ -47,7 +47,7 @@ public class PrismCommands {
     public static CommandSpec getCommand() {
         // Build child commands
         ImmutableMap.Builder<List<String>, CommandCallable> builder = ImmutableMap.builder();
-        builder.put(ImmutableList.of("i", "wand"), InspectCommand.getCommand());
+        builder.put(ImmutableList.of("i", "wand"), WandCommand.getCommand());
         builder.put(ImmutableList.of("l", "lookup"), LookupCommand.getCommand());
         builder.put(ImmutableList.of("near"), NearCommand.getCommand());
         // Sort order newest first for rollback, and oldest first for restore.

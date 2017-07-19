@@ -84,6 +84,7 @@ import com.helion3.prism.storage.mysql.MySQLStorageAdapter;
 @Plugin(id = "prism", name = "Prism", version = "3.0.0", description = "A rollback/restore grief-prevention plugin.", authors = "viveleroi")
 final public class Prism {
     private static List<UUID> activeWands = new ArrayList<>();
+    private static List<UUID> rollbackWands = new ArrayList<>();
     private static final FilterList filterlist = new FilterList(FilterMode.BLACKLIST);
     private static Configuration config;
     private static Game game;
@@ -174,6 +175,10 @@ final public class Prism {
      */
     public static List<UUID> getActiveWands() {
         return activeWands;
+    }
+    
+    public static List<UUID> getActiveRBWands() {
+        return rollbackWands;
     }
 
     /**
