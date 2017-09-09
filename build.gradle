@@ -45,17 +45,22 @@ repositories {
     }
 }
 
+configurations {
+    compile.extendsFrom shadow
+}
+
 // Project dependencies
 dependencies {
     compile 'org.spongepowered:spongeapi:5.2.0-SNAPSHOT'
-    compile 'org.mongodb:mongo-java-driver:3.4.2'
+    shadow 'org.mongodb:mongo-java-driver:3.4.2'
     compile 'com.zaxxer:HikariCP:2.5.1'
 }
 
 shadowJar {
-  dependencies {
-    include(dependency('org.mongodb:.*'))
-  }
+    configurations = [project.configurations.shadow]
+    dependencies {
+        include dependency('org.mongodb:.*')
+    }
 }
 
 // Filter, process, and include resources
@@ -105,3 +110,5 @@ jar.manifest.mainAttributes(
     "Implementation-Title": name,
     "Implementation-Version": version + "+" + ciSystem + "-b" + buildNumber + ".git-" + commit,
     "Implementation-Vendor": url)
+
+build.dependsOn(shadowJar)
