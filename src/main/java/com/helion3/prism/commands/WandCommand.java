@@ -38,7 +38,7 @@ public class WandCommand {
                 .permission("prism.wands")
                 .executor((src, args) -> {
                     if (src instanceof Player) {
-                        src.sendMessage(Format.heading("/rb i | rb"));
+                        src.sendMessage(Format.heading("/pr wand i | rb"));
                         return CommandResult.success();
                     } else {
                         throw new CommandException(Format.error("You must be a player to use this command."));

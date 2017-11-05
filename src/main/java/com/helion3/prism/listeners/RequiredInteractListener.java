@@ -77,6 +77,7 @@ public class RequiredInteractListener {
 
             // Secondary click gets location relative to side clicked
             if (event instanceof Secondary) {
+                if (!((InteractBlockEvent.Secondary) event).getHandType().equals(HandTypes.MAIN_HAND)) return;
                 location = location.getRelative(event.getTargetSide());
             }
 
@@ -112,9 +113,8 @@ public class RequiredInteractListener {
 
             // Secondary click gets location relative to side clicked
             if (event instanceof Secondary) {
-                if (((InteractBlockEvent.Secondary) event).getHandType().equals(HandTypes.MAIN_HAND)) {
-                    location = location.getRelative(event.getTargetSide());
-                }
+                if (!((InteractBlockEvent.Secondary) event).getHandType().equals(HandTypes.MAIN_HAND)) return;
+                location = location.getRelative(event.getTargetSide());
             }
 
             query.addCondition(ConditionGroup.from(location));
